@@ -63,7 +63,7 @@
           formData.append("name", name);
           formData.append("message", message);
 
-          fetch("http://192.168.1.11:3000/upload", {
+          fetch("http://VPS_IP:3000/upload", {
             method: "POST",
             body: formData
           })

@@ -63,7 +63,7 @@
           formData.append("name", name);
           formData.append("message", message);
 
-          fetch("http://VPS_IP:3000/upload", {
+          fetch("http://VDS_IP:3000/upload", {
             method: "POST",
             body: formData
           })
@@ -71,6 +71,16 @@
           .then(data => {
             if (data.success) {
               console.log('Fotoğraf başarıyla yüklendi');
+              // Sunucudan dönen fotoğraf yoluyla galeriyi güncelle
+              const imageUrl = `http://VDS_IP${data.photoPath}`;
+              const div = document.createElement("div");
+              div.className = "entry";
+              div.innerHTML = `
+                <img src="${imageUrl}" alt="Fotoğraf" />
+                <h3>${data.name}</h3>
+                <p>${data.message}</p>
+              `;
+              gallery.prepend(div);
             } else {
               console.error('Yükleme hatası');
             }

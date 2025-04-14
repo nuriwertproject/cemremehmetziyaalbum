@@ -45,51 +45,37 @@
       const file = photoInput.files[0];
 
       if (file) {
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          // Fotoğrafı albüme ekleyelim
-          const div = document.createElement("div");
-          div.className = "entry";
-          div.innerHTML = `
-            <img src="${event.target.result}" alt="Fotoğraf" />
-            <h3>${name}</h3>
-            <p>${message}</p>
-          `;
-          gallery.prepend(div);
+        const formData = new FormData();
+        formData.append("photo", file);
+        formData.append("name", name);
+        formData.append("message", message);
 
-          // Backend'e fotoğrafı yükleyelim
-          const formData = new FormData();
-          formData.append("photo", file);
-          formData.append("name", name);
-          formData.append("message", message);
+        fetch("http://89.213.56.35:3000/upload", {
+          method: "POST",
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const imageUrl = `http://89.213.56.35:3000${data.photoPath}`;
+            const div = document.createElement("div");
+            div.className = "entry";
+            div.innerHTML = `
+              <img src="${imageUrl}" alt="Fotoğraf" />
+              <h3>${data.name}</h3>
+              <p>${data.message}</p>
+            `;
+            gallery.prepend(div);
+          } else {
+            alert("Fotoğraf yüklenemedi.");
+          }
+        })
+        .catch(error => {
+          console.error('Hata:', error);
+          alert("Bir hata oluştu.");
+        });
 
-          fetch("http://VDS_IP:3000/upload", {
-            method: "POST",
-            body: formData
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              console.log('Fotoğraf başarıyla yüklendi');
-              // Sunucudan dönen fotoğraf yoluyla galeriyi güncelle
-              const imageUrl = `http://VDS_IP${data.photoPath}`;
-              const div = document.createElement("div");
-              div.className = "entry";
-              div.innerHTML = `
-                <img src="${imageUrl}" alt="Fotoğraf" />
-                <h3>${data.name}</h3>
-                <p>${data.message}</p>
-              `;
-              gallery.prepend(div);
-            } else {
-              console.error('Yükleme hatası');
-            }
-          })
-          .catch(error => console.error('Hata:', error));
-
-          form.reset();
-        };
-        reader.readAsDataURL(file);
+        form.reset();
       }
     });
   </script>
